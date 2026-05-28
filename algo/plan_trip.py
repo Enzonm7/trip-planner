@@ -103,6 +103,19 @@ class TourOptimizer:
                         improved = True
         return best_tour
         
+    def optimize(self, places):
+        """
+        Run the full optimization pipeline on a list of places.
+        Applies nearest neighbor then 2-opt.
+
+        :param places: List of Place instances to visit
+        :return: Tuple (optimized tour as list of Place, total distance as float)
+        """
+        tour = self.nearest_neighbor(places)
+        tour = self.two_opt(tour)
+        dist = self.total_distance(tour)
+        return tour, dist
+    
         
 if __name__ == "__main__":
     
@@ -120,22 +133,38 @@ if __name__ == "__main__":
     print(total_dist)  
     
     places = [
-        Place("A", 3, 7),
-        Place("B", 2, 4),
-        Place("C", 10, 6)
+        Place("Tokyo",       35.6768601, 139.7638947),
+        Place("Osaka",       34.6937569, 135.5014539),
+        Place("Kanazawa",    36.561627,  136.6568822),
+        Place("Chiba",       35.6070629, 140.1062653),
+        Place("Kyoto",       35.0115754, 135.7681441),
+        Place("Nara",        34.6845445, 135.8048359),
+        Place("Koya",        34.215788,  135.5872944),
+        Place("Himeji",      34.8153529, 134.6854793),
+        Place("Hiroshima",   34.3917241, 132.4517589),
+        Place("Itsukushima", 34.271448,  132.3088722),
+        Place("Magome",      35.5273237, 137.5684127),
+        Place("Nagoya",      35.1851045, 136.8998438),
+        Place("Tsumago",     35.5769907, 137.595421),
+        Place("Hakone",      35.2323662, 139.1068849),
+        Place("Kamakura",    35.3192808, 139.5469627),
+        Place("Enoshima",    35.3001052, 139.4806371),
+        Place("Nikko",       36.7197576, 139.698139),
+        Place("Takao",       35.64166,   139.2816337),
     ]
-    
-    paris      = Place("Paris",      48.8566,  2.3522)
-    marseille  = Place("Marseille",  43.2965,  5.3698)
-    lille      = Place("Lille",      50.6292,  3.0573)
-    bordeaux   = Place("Bordeaux",   44.8378, -0.5792)
-    strasbourg = Place("Strasbourg", 48.5734,  7.7521)
-    lyon       = Place("Lyon",       45.7640,  4.8357)
-    
-    bad_tour = [paris, marseille, lille, bordeaux, strasbourg, lyon, paris]
 
     tour1 = optimizer.nearest_neighbor(places)
     print(tour1)
     
-    tour2 = optimizer.two_opt(bad_tour)
+    tour2 = optimizer.two_opt(tour1)
     print(tour2)
+    
+    optimum = optimizer.optimize(places)
+    print(optimum)
+    
+    dist1 = optimizer.total_distance(tour1)
+    dist2 = optimizer.total_distance(tour2)
+
+    print(f"Nearest neighbor : {dist1:.2f} km")
+    print(f"Après 2-opt      : {dist2:.2f} km")
+    print(f"Gain : {dist1 - dist2:.2f} km")
