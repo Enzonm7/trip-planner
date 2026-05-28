@@ -4,11 +4,32 @@ require("../config/db.php");
 
 if ($_SERVER["REQUEST_METHOD"]=="POST"){
     if ($_POST['action']=="register"){
+        //We get the informations from what posted the user
         $username=$_POST["username"];
         $email=$_POST["email"];
         $pswd=$_POST["pswd"];
 
-        if ($username=="" || $email=="" || $pswd==""){
+        //Verify that there is no user already existing having the same email or username
+        $req1=$pdo->prepare("SELECT * FROM users WHERE email=?");
+        $req1->execute([$email]);
+
+        $check1=$req1->fetch();
+
+        $req2=$pdo->prepare("SELECT * FROM users WHERE username=?");
+        $req2->execute([$username]);
+
+        $check2=$req2->fetch();
+
+        if ($check1){
+            $error3="Email already in use";
+            echo $error3;
+        }
+        elseif ($username){
+            $error4="Username already in use";
+            echo $error4;
+        }
+        //Verify that the user put informations
+        elseif ($username=="" || $email=="" || $pswd==""){
             $error1="Please complete all informations";
             echo $error1;
         }
@@ -18,6 +39,7 @@ if ($_SERVER["REQUEST_METHOD"]=="POST"){
         }
             
         else{
+            //We hash the password and Insert into the database the informations the user has given us
             $pswd_hashed=password_hash($pswd,PASSWORD_DEFAULT);
             $req=$pdo->prepare("INSERT INTO users(username,email,password_hash) VALUES (?,?,?);");
             $req->execute([$username,$email,$pswd_hashed]);
