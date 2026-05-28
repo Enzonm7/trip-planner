@@ -17,6 +17,10 @@ class Place:
         self.name = name
         self.lat = lat
         self.lng = lng
+        
+    def __repr__(self):
+        """Return the string representation of the Place instance."""
+        return self.name
 
 
 class TourOptimizer:
@@ -52,5 +56,20 @@ class TourOptimizer:
         for i in range(len(tour) -1):
             total += self.distance(tour[i], tour[i+1])
         return total
+    
 
+if __name__ == "__main__":
+    
+    p1 = Place("A", 3, 7)
+    p2 = Place("B", 2, 4)
+    print(p1)
+    
+    optimizer = TourOptimizer()
+    
+    dist = optimizer.distance(p1, p2)
+    print(dist)
+    
+    tour = (p1, p2, p1)
+    total_dist = optimizer.total_distance(tour)
+    print(total_dist)  
     
