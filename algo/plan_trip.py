@@ -57,7 +57,33 @@ class TourOptimizer:
             total += self.distance(tour[i], tour[i+1])  
         return total + self.distance(tour[0], tour[-1])
     
+    def nearest_neighbor(self, places):
+        """
+        Build an initial tour using the nearest neighbor heuristic.
+        Starting from the first place, always move to the closest unvisited place.
 
+        :param places: List of Place instances to visit
+        :return: Ordered list of Place instances forming a complete tour
+        """
+        if len(places) < 2:
+            return places
+        unvisited = places.copy()
+        tour = [unvisited.pop(0)]
+        while unvisited:
+            current = tour[-1]
+            nearest = None
+            min_distance = float('inf')
+            for place in unvisited:
+                d = self.distance(current, place)
+                if d < min_distance:
+                    min_distance = d
+                    nearest = place
+            tour.append(nearest)
+            unvisited.remove(nearest)
+        tour.append(tour[0])
+        return tour
+        
+        
 if __name__ == "__main__":
     
     p1 = Place("A", 3, 7)
@@ -69,7 +95,14 @@ if __name__ == "__main__":
     dist = optimizer.distance(p1, p2)
     print(dist)
     
-    tour = (p1, p2)
-    total_dist = optimizer.total_distance(tour)
+    t = (p1, p2)
+    total_dist = optimizer.total_distance(t)
     print(total_dist)  
     
+    places = [
+        Place("A", 3, 7),
+        Place("B", 2, 4),
+        Place("C", 10, 6)
+    ]
+    tour = optimizer.nearest_neighbor(places)
+    print(tour)
