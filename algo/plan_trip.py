@@ -82,6 +82,26 @@ class TourOptimizer:
             unvisited.remove(nearest)
         tour.append(tour[0])
         return tour
+    
+    def two_opt(self, tour):
+        """
+        Improve a tour using the 2-opt optimization algorithm.
+        Iteratively reverses segments of the tour to reduce total distance.
+
+        :param tour: Ordered list of Place instances
+        :return: Optimized list of Place instances
+        """
+        best_tour = tour.copy()
+        improved = True
+        while improved:
+            improved = False
+            for i in range(1, len(best_tour) -2):
+                for j in range(i + 1, len(best_tour) -1):
+                    new_tour = best_tour[:i] + best_tour[i:j+1][::-1] + best_tour[j+1:]
+                    if self.total_distance(new_tour) < self.total_distance(best_tour):
+                        best_tour = new_tour
+                        improved = True
+        return best_tour
         
         
 if __name__ == "__main__":
@@ -104,5 +124,18 @@ if __name__ == "__main__":
         Place("B", 2, 4),
         Place("C", 10, 6)
     ]
-    tour = optimizer.nearest_neighbor(places)
-    print(tour)
+    
+    paris      = Place("Paris",      48.8566,  2.3522)
+    marseille  = Place("Marseille",  43.2965,  5.3698)
+    lille      = Place("Lille",      50.6292,  3.0573)
+    bordeaux   = Place("Bordeaux",   44.8378, -0.5792)
+    strasbourg = Place("Strasbourg", 48.5734,  7.7521)
+    lyon       = Place("Lyon",       45.7640,  4.8357)
+    
+    bad_tour = [paris, marseille, lille, bordeaux, strasbourg, lyon, paris]
+
+    tour1 = optimizer.nearest_neighbor(places)
+    print(tour1)
+    
+    tour2 = optimizer.two_opt(bad_tour)
+    print(tour2)
