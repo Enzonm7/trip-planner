@@ -54,8 +54,8 @@ class TourOptimizer:
         """
         total = 0
         for i in range(len(tour) -1):
-            total += self.distance(tour[i], tour[i+1])
-        return total
+            total += self.distance(tour[i], tour[i+1])  
+        return total + self.distance(tour[0], tour[-1])
     
 
 if __name__ == "__main__":
@@ -69,7 +69,7 @@ if __name__ == "__main__":
     dist = optimizer.distance(p1, p2)
     print(dist)
     
-    tour = (p1, p2, p1)
+    tour = (p1, p2)
     total_dist = optimizer.total_distance(tour)
     print(total_dist)  
     
