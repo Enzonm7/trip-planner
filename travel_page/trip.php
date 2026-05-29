@@ -1,11 +1,9 @@
 <?php
 declare(strict_types=1);
 
-require 'C:\Users\user\Documents\Box_Certif\epreuve-finale\travel_page\strategy\pythonStrategy.php';
-require 'C:\Users\user\Documents\Box_Certif\epreuve-finale\config\db.php';
-session_reset();
+require 'strategy/pythonStrategy.php';
+require '../config/db.php';
 session_start();
-
 
 if (!isset($_SESSION['boxstock'])) {
     $_SESSION['boxstock'] = [];
@@ -56,8 +54,8 @@ $result = null;
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     $city = $_POST['city'] ?? '';
-    if (isset($_POST['add-btn']) && $city !== '') {
 
+    if (isset($_POST['add-btn']) && $city !== '') {
         $coords = search($city);
         $_SESSION['boxstock'][] = [
             "city" => $city,
@@ -67,42 +65,31 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $_SESSION['count'] = ($_SESSION['count'] ?? 0) + 1;
     }
 
-
     elseif (isset($_POST['search-btn'])) {
 
-        $data = json_encode([
-            "data" => array_map("formatBoxstock", $_SESSION['boxstock']),
-            "nombre" => $_SESSION['count']
-        ]);
+        $nb_hotels = isset($_POST['nb_hotels']) && $_POST['nb_hotels'] !== ''
+            ? (int)$_POST['nb_hotels']
+            : null;
+
+        $payload = [
+            "data"   => array_map("formatBoxstock", $_SESSION['boxstock']),
+            "nombre" => $_SESSION['count'],
+        ];
+
+        if ($nb_hotels !== null) {
+            $payload["nb_hotels"] = $nb_hotels;
+        }
+
+        $data = json_encode($payload);
         $strategy = new PythonStrategy();
         $result = $strategy->run($data);
 
-        foreach($result['data'] as $row){
-            
+        foreach ($result['groups'] as $group) {
             try {
-                $userId=1;
-                if(is_array($row)) {
+                $userId = 1;
+                $name     = $group['hotel']['name'];
+                $distance = $group['distance_km'];
 
-                    // Cas associatif
-                    if (isset($row['name']) && isset($row['distance'])) {
-                        $name = $row['name'];
-                        $distance = $row['distance'];
-                    }
-
-                    // Cas indexé
-                    elseif (isset($row[0]) && isset($row[1])) {
-                        $name = $row[0];
-                        $distance = $row[1];
-                    }
-
-                    else {
-                        throw new Exception("Structure de row invalide");
-                    }
-
-                } else {
-                    throw new Exception("Row non exploitable (pas un tableau)");
-                }
-                
                 $sql = "
                     INSERT INTO trips
                     (name, share_token, total_distance, visibility, user_id)
@@ -111,16 +98,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 ";
 
                 $stmt = $pdo->prepare($sql);
-
                 $stmt->execute([
-                    ':name' => $name,
-                    ':token' => uniqid('trip_', true),
-                    ':distance' => $distance,
+                    ':name'       => $name,
+                    ':token'      => uniqid('trip_', true),
+                    ':distance'   => $distance,
                     ':visibility' => 'private',
-                    ':user_id' => $userId
+                    ':user_id'    => $userId
                 ]);
 
-                echo "Insertion réussie<br>";
+                echo "Insertion réussie pour le groupe hôtel : " . htmlspecialchars($name) . "<br>";
 
             } catch (Exception $e) {
                 echo "Erreur data : " . $e->getMessage() . "<br>";
@@ -154,8 +140,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 </nav>
 
 <form method="POST">
-    <input type="text" name="city" placeholder="City">
+    <input type="text" name="city" placeholder="Ville">
     <button type="submit" name="add-btn">Add</button>
+    <br><br>
+    <input type="number" name="nb_hotels" placeholder="Nombre d'hôtels (optionnel)" min="1">
     <button type="submit" name="search-btn">Search</button>
     <button type="submit" name="reset-btn">Reset</button>
 </form>
@@ -169,10 +157,18 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 </pre>
 
 <?php if ($result): ?>
-<h2>Résultat Python :</h2>
-<pre>
-<?= json_encode($result, JSON_PRETTY_PRINT) ?>
-</pre>
+<h2>Résultat :</h2>
+<p>Nombre d'hôtels suggéré : <?= $result['suggested_nb_hotels'] ?></p>
+<p>Distance totale : <?= $result['total_distance_km'] ?> km</p>
+
+<?php foreach ($result['groups'] as $i => $group): ?>
+    <h3>Groupe <?= $i + 1 ?> — Hôtel : <?= htmlspecialchars($group['hotel']['name']) ?></h3>
+    <p>Circuit : <?= implode(' → ', $group['circuit']) ?></p>
+    <p>Distance : <?= $group['distance_km'] ?> km</p>
+<?php endforeach; ?>
+
+<h3>Circuit inter-hôtels</h3>
+<p><?= implode('->', $result['inter_hotel_circuit']) ?></p>
 <?php endif; ?>
 
 </body>

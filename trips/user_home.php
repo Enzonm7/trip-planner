@@ -19,7 +19,7 @@ if (!isset($_SESSION['id'])) {
 </head>
 <body>
     <h1>User Home</h1>
-    <a href="getMyPath.php">Create a trip</a>
+    <a href="../travel_page/trip.php">Create a trip</a>
     <p></p>
     <a href="private.php">View different trips</a>
     <p></p>
