@@ -1,9 +1,11 @@
 <?php
 //Implement Builder.php and Config.php to create a strategy for calling the python script and getting the results
+
 declare(strict_types=1);
 
-final class PythonStrategy{
-    private string $cmd = 'py C:/Users/user/Documents/Box_Certif/epreuve-finale/travel_page/test_algo/main.py';
+final class PythonStrategy {
+
+    private string $cmd;
 
     private array $descriptors = [
         0 => ["pipe", "r"],
@@ -15,6 +17,10 @@ final class PythonStrategy{
     private $pipes;
 
     public function __construct() {
+        // Chemin relatif depuis travel_page/
+        $scriptPath = __DIR__ . '/../test_algo/main.py';
+        $this->cmd  = 'py ' . escapeshellarg($scriptPath); 
+
         $this->process = proc_open(
             $this->cmd,
             $this->descriptors,
@@ -23,7 +29,6 @@ final class PythonStrategy{
     }
 
     public function run($data): mixed {
-
         if (!is_resource($this->process)) {
             return null;
         }
@@ -32,13 +37,15 @@ final class PythonStrategy{
         fclose($this->pipes[0]);
 
         $output = stream_get_contents($this->pipes[1]);
+        $errors = stream_get_contents($this->pipes[2]);
         fclose($this->pipes[1]);
-
         fclose($this->pipes[2]);
-
         proc_close($this->process);
+
+        if (!empty($errors)) {
+            error_log("PythonStrategy stderr: " . $errors);  // visible dans les logs PHP
+        }
 
         return json_decode($output, true);
     }
 }
-?>

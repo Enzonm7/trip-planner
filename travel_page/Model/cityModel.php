@@ -6,7 +6,7 @@ namespace travel_page\builder;
 
 final class cityModel{
 
-    public function __contruct(
+    public function __construct(
         private readonly string $name,
         private float $latitude,
         private float $longitude,
