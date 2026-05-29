@@ -34,7 +34,7 @@ if (isset($_POST['grant_all'])) {
         $insert->execute([$trip_id, $u['id']]);
     }
     // Update visibility to restricted
-    $pdo->prepare("UPDATE trips SET visibility = 'public' WHERE id = ?")->execute([$trip_id]);
+    $pdo->prepare("UPDATE trips SET visibility = 'restricted' WHERE id = ?")->execute([$trip_id]);
     header('Location: private.php');
     exit;
 }

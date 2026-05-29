@@ -1,4 +1,4 @@
-from clustering import Clustering
+from algo.clustering import Clustering
 
 class Hotel(Clustering):
     def find_hotel(self, group):

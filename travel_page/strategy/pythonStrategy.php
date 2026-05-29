@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 final class PythonStrategy{
-    private string $cmd = 'py C:/Users/user/Documents/Box_Certif/epreuve-finale/travel_page/test_algo/main.py';
+    private string $cmd = 'python3 ' . __DIR__ . '/../../travel_page/test_algo/main.py';
 
     private array $descriptors = [
         0 => ["pipe", "r"],

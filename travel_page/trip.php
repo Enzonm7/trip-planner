@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-require 'strategy/pythonStrategy.php';
-require '../config/db.php';
 session_start();
+require_once __DIR__ . '/strategy/pythonStrategy.php';
+require_once __DIR__ . '/../config/db.php';
 
 if (!isset($_SESSION['boxstock'])) {
     $_SESSION['boxstock'] = [];
