@@ -1,4 +1,4 @@
-from algo.clustering import Clustering
+from clustering import Clustering
 
 class Hotel(Clustering):
     def find_hotel(self, group):
@@ -40,15 +40,16 @@ class Hotel(Clustering):
         n = len(places)
         if n <= 2:
             return 1
-
+        max_k = n // 2        
         inertias = []
-        for k in range(1, n + 1):
+        for k in range(1, max_k + 1):
             groups = self.cluster(places, k)
             inertias.append(self.inertia(groups))
-
+        if len(inertias) < 3:
+            return 1
         best_k = 1
         max_curve = float('-inf')
-        for k in range(1, n - 1):
+        for k in range(1, len(inertias) - 1):
             curve = (inertias[k - 1] - inertias[k]) - (inertias[k] - inertias[k + 1])
             if curve > max_curve:
                 max_curve = curve
