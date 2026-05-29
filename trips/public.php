@@ -22,11 +22,13 @@ $trips = $stmt->fetchAll();
 <body>
     <nav>
         <a href="public.php">Public</a>
-        <?php if (isset($_SESSION['user_id'])): ?>
+        <?php if (isset($_SESSION['id'])): ?>
             <a href="half_public.php">Restricted</a>
             <a href="private.php">My Trips</a>
-        <?php endif; ?>
+            <a href="user_home.php">Back</a>
+        <?php else:?>
         <a href="../index.php">Back</a>
+        <?php endif?>
     </nav>
 
     <h1>Public Trips</h1>

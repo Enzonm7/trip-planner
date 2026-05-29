@@ -11,6 +11,6 @@
     <p></p>
     <a href="../auth/register.php">Account Creation</a>
     <p></p>
-    <a href="../view.php">See public trips</a>
+    <a href="trips/public.php">See public trips</a>
 </body>
 </html>

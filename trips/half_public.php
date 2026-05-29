@@ -3,7 +3,7 @@ session_start();
 require_once '../config/db.php';
 
 // The user must be logged in
-if (!isset($_SESSION['user_id'])) {
+if (!isset($_SESSION['id'])) {
     header('Location: ../auth/login.php');
     exit;
 }
@@ -18,7 +18,7 @@ $stmt = $pdo->prepare("
     AND ta.user_id = ?
     ORDER BY t.created_at DESC
 ");
-$stmt->execute([$_SESSION['user_id']]);
+$stmt->execute([$_SESSION['id']]);
 $trips = $stmt->fetchAll();
 ?>
 <!DOCTYPE html>
@@ -29,10 +29,12 @@ $trips = $stmt->fetchAll();
 </head>
 <body>
     <nav>
-        <a href="public.php">Public</a>
-        <a href="half_public.php">Restricted</a>
-        <a href="private.php">My Trips</a>
-        <a href="../index.php">Back</a>
+        <?php if (isset($_SESSION['id'])): ?>
+            <a href="public.php">Public</a>
+            <a href="half_public.php">Restricted</a>
+            <a href="private.php">My Trips</a>
+            <a href="user_home.php">Back</a>
+        <?php endif;?>
     </nav>
 
     <h1>Restricted Trips</h1>
