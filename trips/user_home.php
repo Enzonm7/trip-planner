@@ -1,3 +1,15 @@
+<?php
+
+session_start();
+
+if (!isset($_SESSION['id'])) {
+    header('Location: ../auth/login.php');
+    exit;
+}
+
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,7 +21,7 @@
     <h1>User Home</h1>
     <a href="getMyPath.php">Create a trip</a>
     <p></p>
-    <a href="checklist.php">View different trips</a>
+    <a href="private.php">View different trips</a>
     <p></p>
     <a href="../auth/logout.php">Disconnect</a>
 </body>
