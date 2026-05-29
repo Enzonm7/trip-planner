@@ -173,6 +173,48 @@ class TourOptimizer:
                     break
             centroids.append(chosen)
         return [(c.lat, c.lng) for c in centroids]
+    
+    def assign(self, places, centroid_coords, k):
+        """
+        Assign each place to its nearest centroid.
+        If a group ends up empty, it receives the farthest place
+        from the largest group to ensure every group has at least one place.
+
+        :param places: List of Place instances
+        :param centroid_coords: List of k (lat, lng) tuples
+        :param k: Number of groups
+        :return: List of k lists of Place instances
+        """
+        groups = [[] for _ in range(k)]
+        for place in places:
+            min_d = float('inf')
+            best_idx = 0
+            for i, (clat, clng) in enumerate(centroid_coords):
+                d = self.distance(place, Place("_", clat, clng))
+                if d < min_d:
+                    min_d = d
+                    best_idx = i
+            groups[best_idx].append(place)
+            
+        for i, group in enumerate(groups):
+            if not group:
+                largest = 0
+                for x in range(k):
+                    if len(groups[x]) > len(groups[largest]):
+                        largest = x
+
+                clat, clng = centroid_coords[largest]
+                farthest = None
+                max_d = float('-inf')
+                for p in groups[largest]:
+                    d = self.distance(p, Place("_", clat, clng))
+                    if d > max_d:
+                        max_d = d
+                        farthest = p
+
+                groups[largest].remove(farthest)
+                groups[i].append(farthest)
+        return groups
 
 
 if __name__ == "__main__":
@@ -239,3 +281,12 @@ if __name__ == "__main__":
 
     init_centre = optimizer.init_centroids(places, 3)
     print(init_centre)
+    
+    coords = [
+        (35.5769907, 137.595421),
+        (35.2323662, 139.1068849),
+        (35.3192808, 139.5469627),
+        (35.3001052, 139.4806371)
+    ]
+    assignation = optimizer.assign(groupe, coords, 4)
+    print(assignation)
