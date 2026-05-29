@@ -1,4 +1,5 @@
 import math
+import random
 import json
 import sys
 
@@ -17,7 +18,7 @@ class Place:
         self.name = name
         self.lat = lat
         self.lng = lng
-        
+
     def __repr__(self):
         """Return the string representation of the Place instance."""
         return self.name
@@ -41,7 +42,7 @@ class TourOptimizer:
         lng_a = math.radians(a.lng)
         lng_b = math.radians(b.lng)
         return self.R * math.acos(
-            math.sin(lat_a) * math.sin(lat_b) + 
+            math.sin(lat_a) * math.sin(lat_b) +
             math.cos(lat_a) * math.cos(lat_b) * math.cos(lng_b - lng_a)
         )
 
@@ -54,9 +55,9 @@ class TourOptimizer:
         """
         total = 0
         for i in range(len(tour) -1):
-            total += self.distance(tour[i], tour[i+1])  
+            total += self.distance(tour[i], tour[i+1])
         return total + self.distance(tour[0], tour[-1])
-    
+
     def nearest_neighbor(self, places):
         """
         Build an initial tour using the nearest neighbor heuristic.
@@ -82,7 +83,7 @@ class TourOptimizer:
             unvisited.remove(nearest)
         tour.append(tour[0])
         return tour
-    
+
     def two_opt(self, tour):
         """
         Improve a tour using the 2-opt optimization algorithm.
@@ -102,7 +103,7 @@ class TourOptimizer:
                         best_tour = new_tour
                         improved = True
         return best_tour
-        
+
     def optimize(self, places):
         """
         Run the full optimization pipeline on a list of places.
@@ -115,7 +116,7 @@ class TourOptimizer:
         tour = self.two_opt(tour)
         dist = self.total_distance(tour)
         return tour, dist
-    
+
     def centroid(self, group):
         """
         Compute the mean lat/lng centroid of a group as a temporary Place.
@@ -126,23 +127,69 @@ class TourOptimizer:
         lat = sum(p.lat for p in group) / len(group)
         lng = sum(p.lng for p in group) / len(group)
         return Place("_centroid_", lat, lng)
-    
-        
+
+    # def inertia(self, groups):
+    #     """
+    #     Compute the total inertia of a clustering.
+    #     Inertia = sum of squared distances from each place to its group centroid.
+    #     Used by the elbow method (étape 3) to find the optimal number of hotels.
+
+    #     :param groups: List of lists of Place instances
+    #     :return: Total inertia as float
+    #     """
+    #     total = 0.0
+    #     for group in groups:
+    #         centroid = self.centroid(group)
+    #         for place in group:
+    #             total += self.distance(place, centroid) ** 2
+    #     return total
+
+    def init_centroids(self, places, k):
+        """
+        Initialize k centroids using the K-Means++ algorithm.
+        Each new centroid is chosen with probability proportional to its
+        squared distance to the nearest existing centroid, which spreads
+        them out and reduces the risk of poor clustering.
+
+        :param places: List of Place instances
+        :param k: Number of centroids to initialize
+        :return: List of k (lat, lng) tuples
+        """
+        centroids = [random.choice(places)]
+        while len(centroids) < k:
+            sq_distances = [
+                min(self.distance(p, c) for c in centroids) ** 2
+                for p in places
+            ]
+            total = sum(sq_distances)
+            probs = [d / total for d in sq_distances]
+            r = random.random()
+            cumul = 0.0
+            chosen = places[-1]
+            for i, prob in enumerate(probs):
+                cumul += prob
+                if r <= cumul:
+                    chosen = places[i]
+                    break
+            centroids.append(chosen)
+        return [(c.lat, c.lng) for c in centroids]
+
+
 if __name__ == "__main__":
-    
+
     p1 = Place("A", 3, 7)
     p2 = Place("B", 2, 4)
     print(p1)
-    
+
     optimizer = TourOptimizer()
-    
+
     dist = optimizer.distance(p1, p2)
     print(dist)
-    
+
     t = (p1, p2)
     total_dist = optimizer.total_distance(t)
-    print(total_dist)  
-    
+    print(total_dist)
+
     places = [
         Place("Tokyo",       35.6768601, 139.7638947),
         Place("Osaka",       34.6937569, 135.5014539),
@@ -166,20 +213,20 @@ if __name__ == "__main__":
 
     tour1 = optimizer.nearest_neighbor(places)
     print(tour1)
-    
+
     tour2 = optimizer.two_opt(tour1)
     print(tour2)
-    
+
     optimum = optimizer.optimize(places)
     print(optimum)
-    
+
     dist1 = optimizer.total_distance(tour1)
     dist2 = optimizer.total_distance(tour2)
 
     print(f"Nearest neighbor : {dist1:.2f} km")
     print(f"Après 2-opt      : {dist2:.2f} km")
     print(f"Gain : {dist1 - dist2:.2f} km")
-    
+
     groupe = [
         Place("Tsumago",     35.5769907, 137.595421),
         Place("Hakone",      35.2323662, 139.1068849),
@@ -189,3 +236,6 @@ if __name__ == "__main__":
     ]
     centre = optimizer.centroid(groupe)
     print(centre.lat, centre.lng)
+
+    init_centre = optimizer.init_centroids(places, 3)
+    print(init_centre)
