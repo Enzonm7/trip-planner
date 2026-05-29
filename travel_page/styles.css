@@ -1,0 +1,114 @@
+/* ===== Base ===== */
+body {
+    font-family: Arial, sans-serif;
+    background: #f5f7fb;
+    margin: 0;
+    padding: 0;
+    color: #333;
+}
+h1 {
+    text-align: center;
+    margin-top: 30px;
+    color: #222;
+}
+nav {
+    text-align: center;
+    margin: 20px 0;
+}
+
+nav a {
+    text-decoration: none;
+    color: white;
+    background: #4a6cf7;
+    padding: 8px 14px;
+    border-radius: 6px;
+    margin: 0 5px;
+    transition: 0.2s;
+}
+
+nav a:hover {
+    background: #3a56c4;
+}
+
+form {
+    background: white;
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+input[type="text"] {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    flex: 1;
+    min-width: 200px;
+}
+
+button {
+    padding: 10px 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    color: white;
+    background: #4a6cf7;
+    transition: 0.2s;
+}
+
+button:hover {
+    opacity: 0.85;
+}
+
+button[name="reset-btn"] {
+    background: #e74c3c;
+}
+
+pre {
+    background: #111;
+    color: #0f0;
+    padding: 15px;
+    border-radius: 8px;
+    max-width: 700px;
+    margin: 20px auto;
+    overflow-x: auto;
+}
+
+
+h2 {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.trip {
+    background: white;
+    border: 1px solid #e6e6e6;
+    padding: 15px;
+    margin: 10px auto;
+    border-radius: 10px;
+    max-width: 700px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    transition: transform 0.1s;
+}
+
+.trip:hover {
+    transform: translateY(-2px);
+}
+
+.trip h3 {
+    margin: 0 0 10px 0;
+    color: #4a6cf7;
+}
+
+.trip p {
+    margin: 5px 0;
+}
+
+p {
+    text-align: center;
+}
