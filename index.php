@@ -7,9 +7,9 @@
 </head>
 <body>
     <h1>Home</h1>
-    <a href="../auth/login.php">Authentication</a>
+    <a href="auth/login.php">Authentication</a>
     <p></p>
-    <a href="../auth/register.php">Account Creation</a>
+    <a href="auth/register.php">Account Creation</a>
     <p></p>
     <a href="trips/public.php">See public trips</a>
 </body>
