@@ -32,8 +32,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $place_lngs  = $_POST['place_lngs']  ?? [];
 
     // Update the trip's name
-    $pdo->prepare("UPDATE trips SET name = ? WHERE id = ? AND user_id = ?")
-        ->execute([$trip_name, $trip_id, $_SESSION['id']]);
 
     $nb_hotels = max(1, (int)($_POST['nb_hotels'] ?? 1));
     $pdo->prepare("UPDATE trips SET name = ?, nb_hotels = ? WHERE id = ? AND user_id = ?")

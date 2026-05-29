@@ -1,5 +1,5 @@
 import random
-from plan_trip import Place, TourOptimizer 
+from algo.plan_trip import Place, TourOptimizer 
 
 class Clustering(TourOptimizer):
     def centroid(self, group):
