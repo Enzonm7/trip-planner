@@ -24,7 +24,7 @@ if ($_SERVER["REQUEST_METHOD"]=="POST"){
             $error3="Email already in use";
             echo $error3;
         }
-        elseif ($username){
+        elseif ($check2){
             $error4="Username already in use";
             echo $error4;
         }

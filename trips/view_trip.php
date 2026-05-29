@@ -19,7 +19,7 @@ if (!$trip) {
 
 // Check access rights
 if ($trip['visibility'] === 'private') {
-    if (!isset($_SESSION['id']) || $_SESSION['id'] !== $trip['user_id']) {
+    if (!isset($_SESSION['id']) || (int)$_SESSION['id'] !== (int)$trip['user_id']) {
         header('Location: ../auth/login.php');
         exit;
     }
@@ -30,18 +30,17 @@ if ($trip['visibility'] === 'restricted') {
         header('Location: ../auth/login.php');
         exit;
     }
-    // Check if the user has access
     $stmt = $pdo->prepare("SELECT * FROM trip_access WHERE trip_id = ? AND user_id = ?");
     $stmt->execute([$trip['id'], $_SESSION['id']]);
     $hasAccess = $stmt->fetch();
-    if (!$hasAccess && $_SESSION['id'] !== $trip['user_id']) {
+    if (!$hasAccess && (int)$_SESSION['id'] !== (int)$trip['user_id']) {
         die("Access denied.");
     }
 }
 
-// Fetch the places of this trip in order
+// Fetch places including is_hotel
 $stmt = $pdo->prepare("
-    SELECT p.name, p.latitude, p.longitude, tp.position_order
+    SELECT p.name, p.latitude, p.longitude, tp.position_order, tp.is_hotel
     FROM trip_places tp
     JOIN places p ON p.id = tp.place_id
     WHERE tp.trip_id = ?
@@ -49,32 +48,62 @@ $stmt = $pdo->prepare("
 ");
 $stmt->execute([$trip['id']]);
 $places = $stmt->fetchAll();
+
+// Fetch hotels only
+$stmt = $pdo->prepare("
+    SELECT p.name, p.latitude, p.longitude, tp.position_order
+    FROM trip_places tp
+    JOIN places p ON p.id = tp.place_id
+    WHERE tp.trip_id = ? AND tp.is_hotel = TRUE
+    ORDER BY tp.position_order ASC
+");
+$stmt->execute([$trip['id']]);
+$hotels = $stmt->fetchAll();
+
+$nb_hotels = $trip['nb_hotels'] ?? 1;
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title><?= $trip['name'] ?></title>
+    <title><?= htmlspecialchars($trip['name']) ?></title>
 </head>
 <body>
     <a href="javascript:history.back()">Back</a>
 
-    <h1><?= $trip['name'] ?></h1>
-    <p>By: <?= $trip['username'] ?></p>
+    <h1><?= htmlspecialchars($trip['name']) ?></h1>
+    <p>By: <?= htmlspecialchars($trip['username']) ?></p>
     <p>Visibility: <?= $trip['visibility'] ?></p>
     <p>Total distance: <?= $trip['total_distance'] ? round($trip['total_distance'], 2) . ' km' : 'Not computed' ?></p>
 
+    <!-- Hotels -->
+    <h2>Hotels (<?= $nb_hotels ?>)</h2>
+    <?php if (empty($hotels)): ?>
+        <p>No hotels defined yet.</p>
+    <?php else: ?>
+        <ul>
+            <?php foreach ($hotels as $i => $hotel): ?>
+                <li>
+                    <strong>Hotel <?= $i + 1 ?> — <?= htmlspecialchars($hotel['name']) ?></strong>
+                    (<?= $hotel['latitude'] ?>, <?= $hotel['longitude'] ?>)
+                </li>
+            <?php endforeach; ?>
+        </ul>
+    <?php endif; ?>
+
+    <!-- Tour order -->
     <h2>Tour order</h2>
     <?php if (empty($places)): ?>
         <p>No places in this trip.</p>
     <?php else: ?>
         <ol>
-            <?php 
-            foreach ($places as $place): 
-            ?>
+            <?php foreach ($places as $place): ?>
                 <li>
-                    <?= $place['name'] ?>
+                    <?= htmlspecialchars($place['name']) ?>
                     (<?= $place['latitude'] ?>, <?= $place['longitude'] ?>)
+                    <?php if ($place['is_hotel']): ?>
+                        <strong>Hotel</strong>
+                    <?php endif; ?>
                 </li>
             <?php endforeach; ?>
         </ol>
