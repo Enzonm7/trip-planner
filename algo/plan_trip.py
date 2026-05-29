@@ -20,7 +20,7 @@ class Place:
         
     def __repr__(self):
         """Return the string representation of the Place instance."""
-        return self.name
+        return f"{self.name} ({self.lat:.4f}, {self.lng:.4f})"
 
 
 class TourOptimizer:

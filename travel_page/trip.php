@@ -52,7 +52,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     elseif (isset($_POST['search-btn'])) {
         $data = json_encode(["data" => array_map("formatBoxstock", $_SESSION['boxstock'])]);
 
-        //call cmd 
+        $cmd = "py C:/Users/user/Desktop/Epreuve finale/test_algo/main.py";
         
 
         $descriptors = [0 => ["pipe", "r"],1 => ["pipe", "w"],2 => ["pipe", "w"]];
