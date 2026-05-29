@@ -5,6 +5,9 @@ session_start();
 if (!isset($_SESSION['boxstock'])) {
     $_SESSION['boxstock'] = [];
 }
+function formatBoxstock($e) {
+    return [$e["city"], $e["long"], $e["lat"]];
+}
 
 function nominatim($city){
     $url = 'https://nominatim.openstreetmap.org/search?' . http_build_query([
@@ -47,9 +50,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         ];
     }
     elseif (isset($_POST['search-btn'])) {
-        $data = json_encode(["data" => array_map(fn($e) => [$e["city"], $e["long"], $e["lat"]], $_SESSION['boxstock'])]);
+        $data = json_encode(["data" => array_map("formatBoxstock", $_SESSION['boxstock'])]);
 
-        $cmd = "py C:/Users/user/Documents/Box_Certif/epreuve-finale/travel_page/test_algo/main.py";
+        //call cmd 
+        
 
         $descriptors = [0 => ["pipe", "r"],1 => ["pipe", "w"],2 => ["pipe", "w"]];
 
