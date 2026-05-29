@@ -1,5 +1,5 @@
 import random
-from algo.plan_trip import Place, TourOptimizer 
+from plan_trip import Place, TourOptimizer 
 
 class Clustering(TourOptimizer):
     def centroid(self, group):
@@ -40,6 +40,8 @@ class Clustering(TourOptimizer):
         :param k: Number of centroids to initialize
         :return: List of k (lat, lng) tuples
         """
+        if k >= len(places):
+            return [(p.lat, p.lng) for p in places]
         centroids = [random.choice(places)]
         while len(centroids) < k:
             sq_distances = [
@@ -47,7 +49,10 @@ class Clustering(TourOptimizer):
                 for p in places
             ]
             total = sum(sq_distances)
-            probs = [d / total for d in sq_distances]
+            if total == 0:
+                probs = [1.0 / len(places)] * len(places)
+            else:
+                probs = [d / total for d in sq_distances]
             r = random.random()
             cumul = 0.0
             chosen = places[-1]
@@ -149,8 +154,8 @@ class Clustering(TourOptimizer):
         :param k: Number of clusters (= number of hotels)
         :return: List of k lists of Place instances
         """
-        if k >= len(places):
-            return [[p] for p in places]
+        if len(places) < 2 * k:
+            raise ValueError(f"Impossible to form {k} groups of at least 2 cities each with only {len(places)} cities.")
         if k == 1:
             return [places.copy()]
 
@@ -217,7 +222,7 @@ if __name__ == "__main__":
     updt_center = cluster.update_centroids(assignation)
     print(updt_center)
     
-    groups = cluster.run_kmeans(places, 3)
+    groups = cluster.run_kmeans(places, 5)
     for i, group in enumerate(groups):
         print(f"Groupe {i + 1} : {group}")
         

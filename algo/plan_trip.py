@@ -1,8 +1,4 @@
 import math
-import random
-import json
-import sys
-
 
 class Place:
     """Represents a geographical location with a name and coordinates."""
