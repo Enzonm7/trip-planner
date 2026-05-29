@@ -3,16 +3,13 @@ import json
 
 data = json.load(sys.stdin)
 
-datas=[]
-result = []
-data = data.get("data", datas)
+#table = data.get("data", [])
+table=[["testville1",125],["testville2",50],["testville3",15]]
+number = data.get("nombre", 0)
 
-for i in data:
-    liste={
-        "city": i[0],
-        "longitude": i[1],
-        "latitude": i[2]
-    }
-    result.append(liste)
+output = {
+    "nombre": number,
+    "data": table
+}
 
-print(json.dumps(result))
+print(json.dumps(output))
