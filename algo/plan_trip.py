@@ -20,7 +20,7 @@ class Place:
         
     def __repr__(self):
         """Return the string representation of the Place instance."""
-        return f"{self.name} ({self.lat:.4f}, {self.lng:.4f})"
+        return self.name
 
 
 class TourOptimizer:
@@ -116,6 +116,17 @@ class TourOptimizer:
         dist = self.total_distance(tour)
         return tour, dist
     
+    def centroid(self, group):
+        """
+        Compute the mean lat/lng centroid of a group as a temporary Place.
+
+        :param group: List of Place instances
+        :return: Place instance representing the centroid
+        """
+        lat = sum(p.lat for p in group) / len(group)
+        lng = sum(p.lng for p in group) / len(group)
+        return Place("_centroid_", lat, lng)
+    
         
 if __name__ == "__main__":
     
@@ -168,3 +179,13 @@ if __name__ == "__main__":
     print(f"Nearest neighbor : {dist1:.2f} km")
     print(f"Après 2-opt      : {dist2:.2f} km")
     print(f"Gain : {dist1 - dist2:.2f} km")
+    
+    groupe = [
+        Place("Tsumago",     35.5769907, 137.595421),
+        Place("Hakone",      35.2323662, 139.1068849),
+        Place("Kamakura",    35.3192808, 139.5469627),
+        Place("Enoshima",    35.3001052, 139.4806371),
+        Place("Nikko",       36.7197576, 139.698139),
+    ]
+    centre = optimizer.centroid(groupe)
+    print(centre.lat, centre.lng)
