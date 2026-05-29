@@ -117,106 +117,9 @@ class TourOptimizer:
         dist = self.total_distance(tour)
         return tour, dist
 
-    def centroid(self, group):
-        """
-        Compute the mean lat/lng centroid of a group as a temporary Place.
-
-        :param group: List of Place instances
-        :return: Place instance representing the centroid
-        """
-        lat = sum(p.lat for p in group) / len(group)
-        lng = sum(p.lng for p in group) / len(group)
-        return Place("_centroid_", lat, lng)
-
-    # def inertia(self, groups):
-    #     """
-    #     Compute the total inertia of a clustering.
-    #     Inertia = sum of squared distances from each place to its group centroid.
-    #     Used by the elbow method (étape 3) to find the optimal number of hotels.
-
-    #     :param groups: List of lists of Place instances
-    #     :return: Total inertia as float
-    #     """
-    #     total = 0.0
-    #     for group in groups:
-    #         centroid = self.centroid(group)
-    #         for place in group:
-    #             total += self.distance(place, centroid) ** 2
-    #     return total
-
-    def init_centroids(self, places, k):
-        """
-        Initialize k centroids using the K-Means++ algorithm.
-        Each new centroid is chosen with probability proportional to its
-        squared distance to the nearest existing centroid, which spreads
-        them out and reduces the risk of poor clustering.
-
-        :param places: List of Place instances
-        :param k: Number of centroids to initialize
-        :return: List of k (lat, lng) tuples
-        """
-        centroids = [random.choice(places)]
-        while len(centroids) < k:
-            sq_distances = [
-                min(self.distance(p, c) for c in centroids) ** 2
-                for p in places
-            ]
-            total = sum(sq_distances)
-            probs = [d / total for d in sq_distances]
-            r = random.random()
-            cumul = 0.0
-            chosen = places[-1]
-            for i, prob in enumerate(probs):
-                cumul += prob
-                if r <= cumul:
-                    chosen = places[i]
-                    break
-            centroids.append(chosen)
-        return [(c.lat, c.lng) for c in centroids]
     
-    def assign(self, places, centroid_coords, k):
-        """
-        Assign each place to its nearest centroid.
-        If a group ends up empty, it receives the farthest place
-        from the largest group to ensure every group has at least one place.
-
-        :param places: List of Place instances
-        :param centroid_coords: List of k (lat, lng) tuples
-        :param k: Number of groups
-        :return: List of k lists of Place instances
-        """
-        groups = [[] for _ in range(k)]
-        for place in places:
-            min_d = float('inf')
-            best_idx = 0
-            for i, (clat, clng) in enumerate(centroid_coords):
-                d = self.distance(place, Place("_", clat, clng))
-                if d < min_d:
-                    min_d = d
-                    best_idx = i
-            groups[best_idx].append(place)
-            
-        for i, group in enumerate(groups):
-            if not group:
-                largest = 0
-                for x in range(k):
-                    if len(groups[x]) > len(groups[largest]):
-                        largest = x
-
-                clat, clng = centroid_coords[largest]
-                farthest = None
-                max_d = float('-inf')
-                for p in groups[largest]:
-                    d = self.distance(p, Place("_", clat, clng))
-                    if d > max_d:
-                        max_d = d
-                        farthest = p
-
-                groups[largest].remove(farthest)
-                groups[i].append(farthest)
-        return groups
-
-
+        
+        
 if __name__ == "__main__":
 
     p1 = Place("A", 3, 7)
@@ -266,27 +169,7 @@ if __name__ == "__main__":
     dist2 = optimizer.total_distance(tour2)
 
     print(f"Nearest neighbor : {dist1:.2f} km")
-    print(f"Après 2-opt      : {dist2:.2f} km")
+    print(f"Après 2-opt : {dist2:.2f} km")
     print(f"Gain : {dist1 - dist2:.2f} km")
 
-    groupe = [
-        Place("Tsumago",     35.5769907, 137.595421),
-        Place("Hakone",      35.2323662, 139.1068849),
-        Place("Kamakura",    35.3192808, 139.5469627),
-        Place("Enoshima",    35.3001052, 139.4806371),
-        Place("Nikko",       36.7197576, 139.698139),
-    ]
-    centre = optimizer.centroid(groupe)
-    print(centre.lat, centre.lng)
-
-    init_centre = optimizer.init_centroids(places, 3)
-    print(init_centre)
     
-    coords = [
-        (35.5769907, 137.595421),
-        (35.2323662, 139.1068849),
-        (35.3192808, 139.5469627),
-        (35.3001052, 139.4806371)
-    ]
-    assignation = optimizer.assign(groupe, coords, 4)
-    print(assignation)
